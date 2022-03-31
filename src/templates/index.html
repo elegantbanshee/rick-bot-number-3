@@ -1,0 +1,10 @@
+<script>
+    var nonce = ""
+    for (var index = 0; index < 10; index++) {
+        nonce += parseInt(Math.random() * 10).toString();
+    }
+
+    window.location = "https://www.reddit.com/api/v1/authorize?client_id=lufkdXYjL36JG-5ufI2_-Q&response_type=code&state=STATE&redirect_uri=URI&duration=permanent&scope=submit"
+        .replace("STATE", nonce)
+        .replace("URI", "http://localhost:5000/bot")
+</script>

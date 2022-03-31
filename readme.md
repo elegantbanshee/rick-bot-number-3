@@ -1,14 +1,12 @@
 # rick-bot-number-3
 
-Where is Rick and Morty season 3?
+Where is Rick and Morty season 6?
 
-[/u/rick_bot_number_3] does not know but it does like counting down the time until a vague season 3 release date
+[/u/rick_bot_number_6] does not know but it does like counting down the time until a vague season 3 release date
  on [/r/RickAndMorty].
  The date will be updated if an official one is given before the release.
 
 The initial intention of the bot was to point out the time difference between the off-season 1-2 and 2-3.
-
-Like the bot? Toss me a Schmeckle: `1C55DzMDvTMHQ2o3HUQtHex5EoPKi1Et17`.
 
 # Suggestions
 

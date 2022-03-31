@@ -5,7 +5,7 @@ import time
 import datetime
 from praw import Reddit
 from praw.exceptions import APIException, ClientException
-from prawcore import ServerError
+from prawcore import ServerError, ResponseException
 
 import constants
 from logger import Logger
@@ -13,7 +13,10 @@ from time_util import TimeUtil
 
 
 class Bot:
-    def __init__(self, reddit_password, reddit_username, reddit_client_id, reddit_secret, run_live, interval, comments,
+    reddit_access_token = None
+    reddit_refresh_token = None
+
+    def __init__(self, reddit_client_id, reddit_secret, run_live, interval, comments,
                  comments_root_only, comment_prefix, post_reply_enabled, post_reply_question):
         """
         Initialize the bot
@@ -29,8 +32,7 @@ class Bot:
         :param post_reply_question: boolean - reply only to posts that ask a question
         to the bot.
         """
-        self.reddit_password = reddit_password
-        self.reddit_username = reddit_username
+        self.reddit_username = constants.REDDIT_USERNAME
         self.reddit_client_id = reddit_client_id
         self.reddit_secret = reddit_secret
         self.run_live = run_live
@@ -70,7 +72,7 @@ class Bot:
                 self.reply_to_new_posts(subreddit)
             if self.comments_enabled:
                 self.reply_to_new_comments(subreddit)
-        except (APIException, ClientException, ServerError), e:
+        except (APIException, ClientException, ServerError, ResponseException) as e:
             Logger.exception(e)
             return False
         return True
@@ -80,11 +82,13 @@ class Bot:
         Login with bot credentials
         :return: None
         """
+        while Bot.reddit_refresh_token is None:
+            time.sleep(1)
+
         self.reddit = Reddit(client_id=self.reddit_client_id,
                              client_secret=self.reddit_secret,
                              user_agent=constants.USERAGENT,
-                             username=self.reddit_username,
-                             password=self.reddit_password)
+                             refresh_token=Bot.reddit_refresh_token)
         self.reddit.read_only = not self.run_live
         if self.reddit.read_only:
             Logger.info("Bot running in read only mode.")
@@ -97,20 +101,20 @@ class Bot:
         :param post: PRAW submission or comment
         :return: None
         """
-        season_three = self.countdown_end_phrases[random.randint(0, len(self.countdown_end_phrases) - 1)]
-        season_three %= constants.SEASON_3_URL
-        info_message = "I am a bot. I reply to posts and comments related to season 3."
+        season_six = self.countdown_end_phrases[random.randint(0, len(self.countdown_end_phrases) - 1)]
+        season_six %= constants.SEASON_6_URL
+        info_message = "I am a bot. I reply to posts and comments related to season 6."
         if self.comment_prefix:
-            info_message += " Use **%sseason 3** to summon me in the comments." % constants.COMMENT_PREFIX
+            info_message += " Use **%sseason 6** to summon me in the comments." % constants.COMMENT_PREFIX
         footer = "%s v%s | [%s](%s)" % (constants.NAME,
                                         constants.VERSION,
                                         self.footer_phrases[random.randint(0, len(self.footer_phrases) - 1)],
                                         constants.REPO)
         # TODO Don't handle the season three release message with environment variable logic.
         # Have the message update based on the time.
-        message = "%s\n\n%s\n\n---\n\n%s\n\n%s" % (season_three if constants.SEASON_3_URL else "",
-                                                   TimeUtil.get_season_3_expected_date_reply()
-                                                   if not constants.SEASON_3_URL else "",
+        message = "%s\n\n%s\n\n---\n\n%s\n\n%s" % (season_six if constants.SEASON_6_URL else "",
+                                                   TimeUtil.get_season_6_expected_date_reply()
+                                                   if not constants.SEASON_6_URL else "",
                                                    info_message,
                                                    footer)
         Logger.verbose("Message:\n%s", message)
@@ -157,7 +161,7 @@ class Bot:
             Logger.info("Replying to comment")
             try:
                 self.reply(comment)
-            except APIException, e:
+            except APIException as e:
                 Logger.exception(e)
 
     def get_posts(self, subreddit, interval=None):
@@ -179,7 +183,7 @@ class Bot:
         :return: None
         """
         limits = self.reddit.auth.limits
-        if limits["remaining"] < remaining:
+        if limits["remaining"] is not None and limits["remaining"] < remaining:
             self.sleep_until(limits["reset_timestamp"])
 
     @staticmethod
@@ -273,7 +277,7 @@ class Bot:
             Logger.info("Commenting on post")
             try:
                 self.reply(post)
-            except APIException, e:
+            except APIException as e:
                 Logger.exception(e)
 
     def get_new_comments(self, subreddit):
@@ -308,4 +312,4 @@ class Bot:
 
 if __name__ == '__main__':
     bot = Bot("", "", "", "", "", "", "", "", "", "", True)
-    print bot.is_question("Blah blah season 3?")
+    print(bot.is_question("Blah blah season 3?"))

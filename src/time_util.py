@@ -18,8 +18,7 @@ class Timeval:
 
 
 class TimeUtil:
-    diff_season_two_to_three = None
-    diff_now_to_season_three = None
+    diff_now_to_season_six = None
 
     def __init__(self):
         central = timezone("US/Central")
@@ -33,18 +32,10 @@ class TimeUtil:
 
         season_three_premier_date = datetime(2017, 7, 30, 22, 30, tzinfo=central)  # July 30, 2017 10:30pm
         season_three_production_time = season_three_premier_date_fool - season_three_production_date
+        # Season 6
+        season_six_premier_date = datetime(2023, 3, 1, tzinfo=central) # Some time in March
         # diff
-        TimeUtil.diff_season_two_to_three = self.get_diff(season_two_production_time, season_three_production_time)
-        TimeUtil.diff_now_to_season_three = self.get_diff(datetime.now(central), season_three_premier_date)
-
-    @classmethod
-    def get_season_3_production_time_reply(cls):
-        """
-        Returns a markdown message containing the difference between season 2 and 3's prediction times
-        :return: string
-        """
-        return "Season three production was about%s behind season 2." \
-               % cls.get_time_string(cls.diff_season_two_to_three)
+        TimeUtil.diff_now_to_season_six = self.get_diff(datetime.now(central), season_six_premier_date)
 
     @classmethod
     def get_plural(cls, number):
@@ -99,13 +90,13 @@ class TimeUtil:
         return "%s%s%s%s%s%s" % (years, months, days, hours, minutes, seconds)
 
     @classmethod
-    def get_season_3_expected_date_reply(cls):
+    def get_season_6_expected_date_reply(cls):
         """
-        Returns a markdown message with the time until now and the expected release of season 3.
+        Returns a markdown message with the time until now and the expected release of season 6.
         :return: string
         """
-        return "More season three in%s. `July 30, 2017 11:30 EST`" \
-               % cls.get_time_string(cls.diff_now_to_season_three)
+        return "Get ready for season six in%s. `March 1, 2023 11:30 EST`" \
+               % cls.get_time_string(cls.diff_now_to_season_six)
 
 
 TimeUtil()
@@ -116,6 +107,5 @@ if __name__ == '__main__':
 
     while True:
         TimeUtil()
-        print TimeUtil.get_season_3_expected_date_reply()
-        print TimeUtil.get_season_3_production_time_reply()
+        print(TimeUtil.get_season_6_expected_date_reply())
         time.sleep(1)
