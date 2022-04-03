@@ -85,6 +85,9 @@ class Bot:
         while Bot.reddit_refresh_token is None:
             time.sleep(1)
 
+        if self.reddit is not None:
+            return
+
         self.reddit = Reddit(client_id=self.reddit_client_id,
                              client_secret=self.reddit_secret,
                              user_agent=constants.USERAGENT,
